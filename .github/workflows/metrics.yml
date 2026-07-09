@@ -1,34 +1,42 @@
-name: Metrics
+name: GitHub Metrics
 
 on:
   schedule:
-    - cron: "0 0 * * *"   # regenerate once a day
-  workflow_dispatch:        # lets you trigger it manually from the Actions tab
+    - cron: "0 0 * * *"
+  workflow_dispatch:
   push:
-    branches: [main, master]
+    branches:
+      - main
 
 jobs:
-  github-metrics:
+  metrics:
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
+
     steps:
-      - uses: lowlighter/metrics@latest
+      - name: Generate metrics
+        uses: gh-metrics/metrics@master
         with:
           token: ${{ secrets.METRICS_TOKEN }}
-          filename: metrics.svg
+          committer_token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Only the profile header from the base template —
-          # no contribution calendar / snake-style chart
+          filename: metrics.svg
+          output_action: commit
+          committer_branch: main
+
           base: header
 
-          # Language breakdown chart
+          plugin_activity: yes
+          plugin_activity_limit: 5
+          plugin_activity_days: 14
+          plugin_activity_visibility: all
+          plugin_activity_timestamps: no
+
           plugin_languages: yes
           plugin_languages_limit: 8
           plugin_languages_threshold: 0
+          plugin_languages_sections: most-used
           plugin_languages_details: percentage
-
-          # Recent activity feed (commits, PRs, issues, releases)
-          plugin_activity: yes
-          plugin_activity_limit: 5
-          plugin_activity_visibility: all
+          plugin_languages_colors: github
